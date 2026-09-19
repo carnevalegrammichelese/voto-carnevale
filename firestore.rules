@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Gruppi: lettura libera (serve alla pagina di voto),
+    // creare/modificare/rimuovere richiede login (solo organizzatori)
+    match /gruppi/{gruppoId} {
+      allow read: if true;
+
+      allow create: if request.auth != null &&
+                       request.resource.data.name is string &&
+                       request.resource.data.name.size() > 0 &&
+                       request.resource.data.categoria in
+                         ['carro','maschera_gruppo','scuole','maschera_singola'] &&
+                       request.resource.data.visibile is bool;
+
+      allow update: if request.auth != null &&
+                       request.resource.data.name is string &&
+                       request.resource.data.name.size() > 0 &&
+                       request.resource.data.categoria in
+                         ['carro','maschera_gruppo','scuole','maschera_singola'] &&
+                       request.resource.data.visibile is bool;
+
+      allow delete: if request.auth != null;
+    }
+
+    // Titolo evento: lettura libera (lo mostra anche la pagina di voto), modifica solo con login
+    match /impostazioni/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Preferenze del pubblico: SENZA login. Un solo invio per (dispositivo, categoria),
+    // mai modificabile. Ogni invio assegna 1°/2°/3° posto con relativo punteggio.
+    match /preferenze/{prefId} {
+      allow read: if true;
+
+      allow create: if
+        request.resource.data.deviceId is string &&
+        request.resource.data.categoria is string &&
+        request.resource.data.primo is string &&
+        request.resource.data.puntiPrimo is number;
+
+      allow update: if false;
+      allow delete: if request.auth != null;
+    }
+  }
+}
