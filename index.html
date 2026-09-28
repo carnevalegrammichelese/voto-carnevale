@@ -303,18 +303,12 @@ const CATEGORIES = [
 ];
 
 // Quante posizioni (1°,2°,3°) si possono assegnare in base al numero di
-// partecipanti della categoria. La categoria "carro" ha soglie diverse
-// dalle altre tre, come richiesto.
+// partecipanti della categoria. La regola è la stessa per tutte le categorie.
 function getMaxSelections(categoryId, n){
-  if(n <= 1) return 0;
-  if(categoryId === 'carro'){
-    if(n === 2 || n === 3) return 1;
-    if(n === 4) return 2;
-    return 3; // n >= 5
-  }
-  if(n === 2) return 1;
-  if(n === 3) return 2;
-  return 3; // n >= 4
+  if(n <= 1) return 0;   // 1 partecipante: nessuna votazione
+  if(n === 2) return 1;  // 2 partecipanti: solo il 1°
+  if(n === 3) return 2;  // 3 partecipanti: 1° e 2°
+  return 3;              // 4 o più: 1°, 2° e 3°
 }
 
 document.getElementById('eventTitle').textContent = EVENT_CONFIG.eventName;
